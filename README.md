@@ -15,9 +15,7 @@ This architecture relies on two separate codebases for maximum safety, versionin
 
 ```text
 gcp-tf-projects/                 
-├── .gitmodules                         # Links to our shared module repositories
-├── .gitignore                          # Gitignore file
-├── sample-project/
+├── sample-project/                     # Main directory for service project configuration
 │   ├── config.yaml                     # THE SINGLE SOURCE OF TRUTH (Your infrastructure data)
 │   ├── main.tf                         # The Orchestrator: reads the YAML and calls modules
 │   ├── variables.tf                 
@@ -26,7 +24,9 @@ gcp-tf-projects/
 │   ├── output.tf                       # Terraform Output configuration
 │   └── providers.tf                    # Terraform providers
 ├── gcp-tf-templates/modules/           # Custom internal modules (e.g., dynamic IAM)
-└── cloud-foundation-fabric/modules/    # Official Google Cloud Foundation FAST modules
+├── cloud-foundation-fabric/modules/    # Official Google Cloud Foundation FAST modules
+├── .gitmodules                         # Links to shared module repositories
+└── .gitignore                          # Gitignore file
 ```
 
 ## How It Works
@@ -78,35 +78,41 @@ Our custom IAM module uses the `length()` of the YAML dictionaries to determine 
 
 Because this architecture uses a `for_each` loop to deploy resources dynamically based on the `config.yaml`, the Terraform outputs are also generated dynamically. 
 
-Instead of a flat list of individual attributes, the outputs are grouped into maps that mirror the structure of `config.yaml` file. 
-
-This means whether you deploy 1 Virtual Machine or 100, the output remains clean and organized by the resource names you defined.
+To cleanly handle resources that might not be deployed (avoiding cluttered outputs like `databases = {}`), we
+use a "Single Map" pattern. The `infrastructure` output block groups all deployed resources. If a specific
+type of resource (e.g., Cloud SQL) is not deployed, its key evaluates to `null`.
 
 ### Example Output Structure
 
-When you run `terraform apply`, you will receive grouped blocks of information:
+When you run `terraform apply`, you will receive grouped blocks of information containing only the
+infrastructure that was deployed:
 
 ```text
 Outputs:
 
-vms = {
-  "my-linux-vm" = {
-    "id"         = "projects/.../zones/europe-west1-b/instances/my-linux-vm"
-    "private_ip" = "10.0.0.5"
-    "ssh_login"  = "gcloud compute ssh my-linux-vm --zone=europe-west1-b"
-  }
+infrastructure = {
+    vms = {
+    "my-linux-vm" = {
+        "id"         = "projects/.../zones/europe-west1-b/instances/my-linux-vm"
+        "private_ip" = "10.0.0.5"
+        "ssh_login"  = "gcloud compute ssh my-linux-vm --zone=europe-west1-b"
+    }
+    }
+    cloud_runs = {
+    "my-hello-app" = {
+        "uri" = "https://my-hello-app-abc123def-ew.a.run.app"
+    }
+    }
+    databases = null
 }
-cloud_runs = {
-  "my-hello-app" = {
-    "uri" = "https://my-hello-app-abc123def-ew.a.run.app"
-  }
-}
-databases = {
-  "my-pg-database" = {
-    "instance_name" = "my-pg-database-xyz987"
-    "ip_address"    = "10.10.0.4"
-  }
-}
+```
+To completely hide the `null` values when viewing the output in your terminal, you can filter it dynamically:
+```bash
+terraform output -json infrastructure | jq 'with_entries(select(.value != null))'
+```
+Redirected output to a file:
+```bash
+terraform output -json infrastructure | jq 'with_entries(select(.value != null))' > output.json
 ```
 
 ### Retrieving Sensitive Data (Passwords)
