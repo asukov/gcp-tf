@@ -1,34 +1,46 @@
-output "vm_name" {
-  description = "Requested VM instance name."
-  value       = var.instance_name
+# ==========================================
+# VM OUTPUTS
+# ==========================================
+output "vms" {
+  description = "Details of all deployed Virtual Machines."
+  value = {
+    for name, instance in module.vm : name => {
+      id            = instance.id
+      private_ip    = instance.internal_ip
+      ssh_login     = instance.login_command
+    }
+  }
 }
 
-output "vm_id" {
-  description = "Compute instance ID."
-  value       = module.vm.id
+# ==========================================
+# CLOUD RUN OUTPUTS
+# ==========================================
+output "cloud_runs" {
+  description = "URIs of all deployed Cloud Run services."
+  value = {
+    for name, service in module.cloud_run : name => {
+      uri = service.service_uri
+    }
+  }
 }
 
-output "vm_private_ip" {
-  value = module.vm.internal_ip
+# ==========================================
+# CLOUD SQL OUTPUTS
+# ==========================================
+output "databases" {
+  description = "Connection details for all Cloud SQL instances."
+  value = {
+    for name, db in module.db : name => {
+      instance_name = db.name
+      ip_address    = db.ip
+    }
+  }
 }
 
-output "vm_ssh_login" {
-  value = module.vm.login_command
-}
-
-output "cloud_run_uri" {
-  value = module.cloud_run.service_uri
-}
-
-output "cloud_sql_name" {
-  value = module.db.name
-}
-
-output "cloud_sql_ip" {
-  value = module.db.ip
-}
-
-output "cloud_sql_password" {
-  value     = module.db.user_passwords
-  sensitive = true
+output "database_passwords" {
+  description = "Generated passwords for all Cloud SQL databases."
+  value = {
+    for name, db in module.db : name => db.user_passwords
+  }
+  sensitive = true # Keeps all passwords hidden in the console
 }
