@@ -14,15 +14,17 @@ This architecture relies on two separate codebases for maximum safety, versionin
 2. **Modules Repository (Git Submodules):** Contains the reusable, logic-heavy Terraform modules (e.g., Google's Fabric FAST modules and our custom IAM module) that are incorporated as Git submodules (`.gitmodules`).
 
 ```text
-my-project-repo/                 
-├── .gitmodules                  # Links to our shared module repositories
-├── config.yaml                  # THE SINGLE SOURCE OF TRUTH (Your infrastructure data)
-├── main.tf                      # The Orchestrator: reads the YAML and calls modules
-├── variables.tf                 
-├── terraform.tfvars             # Environment-specific variables (Project ID, Deployer SA)
-├── backend.tf                   # GCS State Bucket configuration
-├── output.tf                    # Terraform Output configuration
-│
+gcp-tf-projects/                 
+├── .gitmodules                         # Links to our shared module repositories
+├── .gitignore                          # Gitignore file
+├── sample-project/
+│   ├── config.yaml                     # THE SINGLE SOURCE OF TRUTH (Your infrastructure data)
+│   ├── main.tf                         # The Orchestrator: reads the YAML and calls modules
+│   ├── variables.tf                 
+│   ├── terraform.tfvars                # Environment-specific variables (Project ID, Deployer SA)
+│   ├── backend.conf                    # GCS State Bucket configuration
+│   ├── output.tf                       # Terraform Output configuration
+│   └── providers.tf                    # Terraform providers
 ├── gcp-tf-templates/modules/           # Custom internal modules (e.g., dynamic IAM)
 └── cloud-foundation-fabric/modules/    # Official Google Cloud Foundation FAST modules
 ```
