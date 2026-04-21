@@ -26,6 +26,13 @@ output "infrastructure" {
         ip_address    = db.ip
       }
     } : null
+
+    # 4. Add Buckets only if they exist
+    buckets = length(module.gcs_bucket) > 0 ? {
+      for name, bucket in module.gcs_bucket : name => {
+        url = bucket.url
+      }
+    } : null
   }
 }
 

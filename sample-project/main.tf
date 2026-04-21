@@ -16,6 +16,7 @@ module "iam_permissions" {
   enable_vm_permissions       = length(try(local.config.vms, {})) > 0
   enable_cloudrun_permissions = length(try(local.config.cloud_runs, {})) > 0
   enable_cloudsql_permissions = length(try(local.config.databases, {})) > 0
+  enable_cloudstorage_permissions = length(try(local.config.storage_buckets, {})) > 0
   
   # Pass the list of Cloud Run names for the Service Account creation
   cloud_run_names = try(keys(local.config.cloud_runs), [])
@@ -123,6 +124,27 @@ module "db" {
   users = {
     user1 = { password = null } # Let the module generate a random password
   }
+
+  depends_on = [module.iam_permissions]
+}
+
+
+module "gcs_bucket" {
+  source     = "../cloud-foundation-fabric/modules/gcs"
+  
+  for_each   = try(local.config.storage_buckets, {})
+
+  project_id = var.project_id
+  name       = each.key
+  location   = each.value.location
+  storage_class               = try(each.value.storage_class, "STANDARD")
+  versioning                  = try(each.value.versioning, true)
+  uniform_bucket_level_access = try(each.value.uniform_bucket_level_access, true)
+  force_destroy               = try (each.value.force_destroy, false)
+  public_access_prevention    = try(each.value.public_access, false) ? "inherited" : "enforced"
+  iam                         = try(each.value.public_access, false) ? {
+                                  "roles/storage.objectViewer" = ["allUsers"]
+                                } : {}
 
   depends_on = [module.iam_permissions]
 }
