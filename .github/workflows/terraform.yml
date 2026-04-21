@@ -24,6 +24,8 @@ jobs:
     steps:
     - name: 'Checkout Repository'
       uses: actions/checkout@v4
+      with:
+        submodules: 'recursive' # If your repo has submodules, this ensures they are also checked out
 
     # 1. The Official Google Auth Action
     - name: 'Authenticate to Google Cloud'
