@@ -39,7 +39,7 @@
 #     force_destroy: true
 #     public_access: false
   # A bucket for public website
-  "public-website_bucket":
+  public-website_bucket:
     location: "EU"
     storage_class: "STANDARD"
     # Uniform bucket-level access MUST be true for modern public buckets
