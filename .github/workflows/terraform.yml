@@ -1,0 +1,57 @@
+name: 'Terraform Deploy via WIF'
+
+on:
+  push:
+    branches:
+      - main
+
+# CRITICAL: You must explicitly request these permissions for OIDC to work!
+permissions:
+  contents: 'read'
+  id-token: 'write' # This allows GitHub to mint the OIDC token
+
+jobs:
+  terraform:
+    name: 'Terraform Apply'
+    runs-on: ubuntu-latest
+
+    # Tell GitHub Actions that every 'run' step in this job 
+    # should execute inside the './sample-project' folder
+    defaults:
+      run:
+        working-directory: ./sample-project
+
+    steps:
+    - name: 'Checkout Repository'
+      uses: actions/checkout@v4
+
+    # 1. The Official Google Auth Action
+    - name: 'Authenticate to Google Cloud'
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        # The full path to the Provider you created in Phase 1
+        workload_identity_provider: 'projects/123456789012/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+        
+        # The email of the service account you want to impersonate
+        service_account: 'asukov-tf-rw@boxwood-bee-484209-r9.iam.gserviceaccount.com'
+        
+        # This tells the action to export the token as an environment variable for Terraform
+        export_environment_variables: true
+
+    # 2. Set up Terraform
+    - name: 'Setup Terraform'
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.5.0" # Match your FAST version
+
+    # 3. Run Terraform (It automatically uses the auth from Step 1)
+    - name: 'Terraform Init'
+      run: terraform init
+
+    - name: 'Terraform Plan'
+      run: terraform plan
+
+    - name: 'Terraform Apply'
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -auto-approve
