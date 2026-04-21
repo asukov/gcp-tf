@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    # Bucket name is provided via backend.conf during terraform init
+    bucket = var.state_bucket
     prefix = "terraform/fast_state"
     # Impersonate tf service account to access the state bucket
     impersonate_service_account = "asukov-tf-rw@boxwood-bee-484209-r9.iam.gserviceaccount.com"
