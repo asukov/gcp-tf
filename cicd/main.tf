@@ -41,11 +41,3 @@ resource "google_service_account_iam_member" "allow_github_impersonation" {
   member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_pool.name}/attribute.repository/asukov/gcp-tf-projects"
 }
 
-# Allow token creation
-resource "google_service_account_iam_member" "github_token_creation" {
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.terraform_service_account}"
-  
-  role               = "roles/iam.serviceAccountTokenCreator"
-  
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_pool.name}/attribute.repository/asukov/gcp-tf-projects"
-}
