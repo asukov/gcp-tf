@@ -38,12 +38,12 @@
 #     versioning: true
 #     force_destroy: true
 #     public_access: false
-#   # A bucket for public website
-#   "public-website_bucket":
-#     location: "EU"
-#     storage_class: "STANDARD"
-#     # Uniform bucket-level access MUST be true for modern public buckets
-#     uniform_bucket_level_access: true
-#     versioning: true
-#     force_destroy: true
-#     public_access: true
+  # A bucket for public website
+  "public-website_bucket":
+    location: "EU"
+    storage_class: "STANDARD"
+    # Uniform bucket-level access MUST be true for modern public buckets
+    uniform_bucket_level_access: true
+    versioning: true
+    force_destroy: true
+    public_access: true

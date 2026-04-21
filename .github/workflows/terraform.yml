@@ -55,13 +55,13 @@ jobs:
       run: |
         pwd
         ls -la
-    
+
     # - name: 'Force Unlock State'
     #   run: terraform force-unlock -force 1776780558207852
 
     - name: 'Terraform Plan'
-      run: terraform plan
+      run: terraform plan -out=tfplan
 
     - name: 'Terraform Apply'
       if: github.ref == 'refs/heads/main'
-      run: terraform apply -auto-approve
+      run: terraform apply tfplan
