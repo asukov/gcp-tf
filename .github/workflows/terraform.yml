@@ -45,7 +45,7 @@ jobs:
     - name: 'Setup Terraform'
       uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: "1.5.0" # Match your FAST version
+        terraform_version: "1.14.4" # Match your FAST version
 
     # 3. Run Terraform (It automatically uses the auth from Step 1)
     - name: 'Terraform Init'
