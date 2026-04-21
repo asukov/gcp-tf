@@ -7,10 +7,10 @@ terraform {
 
 provider "google" {
   project                     = var.project_id
-  impersonate_service_account = var.terraform_service_account
+  #impersonate_service_account = var.terraform_service_account
 }
 
 provider "google-beta" {
   project                     = var.project_id
-  impersonate_service_account = var.terraform_service_account
+  #impersonate_service_account = var.terraform_service_account
 }
