@@ -1,24 +1,24 @@
-vms:
-  my-linux-vm: # VM name
-    zone: "us-west1-a"
-    machine_type: "e2-micro"
-    network: "default"
-    subnetwork: "default"
-    assign_external_ip: false
-    boot_disk_image_project: "ubuntu-os-cloud"
-    boot_disk_image_family: "ubuntu-2204-lts"
+# vms:
+#   my-linux-vm: # VM name
+#     zone: "us-west1-a"
+#     machine_type: "e2-micro"
+#     network: "default"
+#     subnetwork: "default"
+#     assign_external_ip: false
+#     boot_disk_image_project: "ubuntu-os-cloud"
+#     boot_disk_image_family: "ubuntu-2204-lts"
 
-cloud_runs:
-  my-hello-app: # Cloud Run service name
-    region: "us-west1"
-    image: "us-docker.pkg.dev/cloudrun/container/hello"
+# cloud_runs:
+#   my-hello-app: # Cloud Run service name
+#     region: "us-west1"
+#     image: "us-docker.pkg.dev/cloudrun/container/hello"
 
-databases:
-  my-pg-database: # Cloud SQL instance name
-    region: "us-west1"
-    network: "default"
-    database_version: "MYSQL_8_0"
-    tier: "db-f1-micro"
+# databases:
+#   my-pg-database: # Cloud SQL instance name
+#     region: "us-west1"
+#     network: "default"
+#     database_version: "MYSQL_8_0"
+#     tier: "db-f1-micro"
 
 storage_buckets:
   # A standard multi-region bucket in the EU region
