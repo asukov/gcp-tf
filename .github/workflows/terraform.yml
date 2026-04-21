@@ -56,9 +56,8 @@ jobs:
         pwd
         ls -la
 
-    - name: 'Force Unlock State'
-      # Replace '1659918074900984' with YOUR actual Lock ID from the error message!
-      run: terraform force-unlock -force 1776780558207852
+    # - name: 'Force Unlock State'
+    #   run: terraform force-unlock -force 1776780558207852
 
     - name: 'Terraform Plan'
       run: terraform plan
