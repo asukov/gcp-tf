@@ -1,6 +1,9 @@
 locals {
   # 1. Read the YAML file and parse it into a Terraform map
-  config = yamldecode(file("${path.module}/config.yaml"))
+  #config = yamldecode(file("${path.module}/config.yaml"))
+  config_file_content = file("${path.module}/config.yaml")
+  config = try(yamldecode(local.config_file_content), {})
+
 }
 
 # ==========================================
