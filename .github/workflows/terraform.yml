@@ -50,6 +50,11 @@ jobs:
     # 3. Run Terraform (It automatically uses the auth from Step 1)
     - name: 'Terraform Init'
       run: terraform init
+    
+    - name: 'Debug Directory Contents'
+      run: |
+        pwd
+        ls -la
 
     - name: 'Terraform Plan'
       run: terraform plan
