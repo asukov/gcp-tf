@@ -21,7 +21,7 @@
 #     tier: "db-f1-micro"
 
 storage_buckets:
-  A standard multi-region bucket in the EU region
+  # A standard multi-region bucket in the EU region
   multi-regional-storage-bucket: # Cloud Storage bucket name
     location: "EU"
     # storage_class can be "STANDARD", "NEARLINE", "COLDLINE", "ARCHIVE"
