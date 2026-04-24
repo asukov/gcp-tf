@@ -6,12 +6,18 @@
 	"image": "mcr.microsoft.com/devcontainers/base:trixie",
 	"features": {
 		"ghcr.io/devcontainers/features/python:1": {},
-		"ghcr.io/devcontainers/features/terraform:1": {}
+		"ghcr.io/devcontainers/features/terraform:1": {},
+		"ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
 	},
 
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-
+	"mounts": [
+    	"source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume"
+  	],
+  	"containerEnv": {
+    	"CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+  	},
+  	"containerUser": "vscode",
+	
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
