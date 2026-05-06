@@ -3,12 +3,6 @@ name: 'Terraform Deploy via WIF'
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      force_apply:
-        description: 'Set to true to approve deletions/modifications'
-        type: boolean
-        default: false
 
 # CRITICAL: You must explicitly request these permissions for OIDC to work!
 permissions:
@@ -49,7 +43,6 @@ jobs:
         working-directory: ./sample-project
     outputs:
       has_changes: ${{ steps.plan.outputs.has_changes }}
-      is_risky: ${{ steps.plan.outputs.is_risky }}
     steps:
       - name: 'Checkout Repository'
         uses: actions/checkout@v4
@@ -69,7 +62,6 @@ jobs:
 
       - run: terraform init
 
-      # detailed-exitcode returns 2 if there are changes, 0 if no changes
       - name: 'Terraform Plan'
         id: plan
         continue-on-error: true
@@ -78,21 +70,15 @@ jobs:
           set +e 
           terraform plan -detailed-exitcode -out=tfplan
           EXIT_CODE=$?
-          
+          set -e # Re-enable 'exit on error' for the rest of the script
+
           if [ $EXIT_CODE -eq 2 ]; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            # FIX: Added -r to ensure raw string output
-            RISKY=$(terraform show -json tfplan | jq -r '[.resource_changes[]?.change.actions[] | select(. == "delete" or . == "update")] | length > 0')
-            echo "is_risky=$RISKY" >> $GITHUB_OUTPUT
-            
-            # Debugging output to see it in the logs
-            echo "Detected has_changes=true and is_risky=$RISKY"
-            
           elif [ $EXIT_CODE -eq 0 ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "is_risky=false" >> $GITHUB_OUTPUT
             echo "No changes detected."
           else
+            echo "Terraform plan failed with exit code $EXIT_CODE"
             exit $EXIT_CODE
           fi
 
@@ -112,18 +98,16 @@ jobs:
         run: |
           echo "=== DEBUG INFO ==="
           echo "has_changes: '${{ needs.terraform-plan.outputs.has_changes }}'"
-          echo "is_risky: '${{ needs.terraform-plan.outputs.is_risky }}'"
-          echo "github.event.inputs.force_apply: '${{ github.event.inputs.force_apply }}'"
-          echo "inputs.force_apply: '${{ inputs.force_apply }}'"
-          echo "github.ref: '${{ github.ref }}'"
           echo "=================="
 
   terraform-apply:
     name: 'Apply'
     needs: terraform-plan
-    # Logic: Only run if changes exist AND (it's not risky OR user clicked force checkbox)
-    if: needs.terraform-plan.outputs.has_changes == 'true' && (needs.terraform-plan.outputs.is_risky == 'false' || inputs.force_apply == true || inputs.force_apply == 'true')
+    # Only run if there are actual changes
+    if: needs.terraform-plan.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
+    # pauses the job and waits for the reviewer in the 'production' environment
+    environment: production
     defaults:
       run:
         working-directory: ./sample-project
@@ -145,7 +129,8 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.14.4"
-          terraform_wrapper: false
 
       - run: terraform init
-      - run: terraform apply -auto-approve tfplan
+
+      - name: 'Terraform Apply'
+        run: terraform apply -auto-approve tfplan
