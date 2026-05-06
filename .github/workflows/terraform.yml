@@ -40,7 +40,7 @@ jobs:
   #         CKV_GCP_42,
   #         CKV_GCP_49,
   #         CKV_GCP_125
-  
+
   terraform-plan:
     name: 'Plan'
     runs-on: ubuntu-latest
@@ -53,6 +53,8 @@ jobs:
     steps:
       - name: 'Checkout Repository'
         uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
       - name: 'Authenticate to Google Cloud'
         uses: google-github-actions/auth@v2
