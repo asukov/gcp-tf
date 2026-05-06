@@ -10,33 +10,34 @@ permissions:
   id-token: 'write' # This allows GitHub to mint the OIDC token
 
 jobs:
-  # terraform-scan:
-  #   name: 'Terraform Scan'
-  #   runs-on: ubuntu-latest
+  terraform-scan:
+    name: 'Terraform Scan'
+    runs-on: ubuntu-latest
 
-  #   # Tell GitHub Actions that every 'run' step in this job 
-  #   # should execute inside the './sample-project' folder
-  #   defaults:
-  #     run:
-  #       working-directory: ./sample-project
+    # Tell GitHub Actions that every 'run' step in this job 
+    # should execute inside the './sample-project' folder
+    defaults:
+      run:
+        working-directory: ./sample-project
 
-  #   steps:
-  #   - name: 'Checkout Repository'
-  #     uses: actions/checkout@v4
+    steps:
+    - name: 'Checkout Repository'
+      uses: actions/checkout@v4
 
-  #   - name: Run Checkov IaC scan
-  #     uses: bridgecrewio/checkov-action@master
-  #     with:
-  #       directory: /
-  #       framework: terraform
-  #       output_format: cli
-  #       skip_check: >-
-  #         CKV_GCP_42,
-  #         CKV_GCP_49,
-  #         CKV_GCP_125
+    - name: Run Checkov IaC scan
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: /
+        framework: terraform
+        output_format: cli
+        skip_check: >-
+          CKV_GCP_42,
+          CKV_GCP_49,
+          CKV_GCP_125
 
   terraform-plan:
     name: 'Plan'
+    needs: terraform-scan
     runs-on: ubuntu-latest
     defaults:
       run:
