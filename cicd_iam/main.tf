@@ -21,8 +21,7 @@ resource "google_iam_workload_identity_pool_provider" "github_provider" {
   # Map the GitHub token claims to Google Cloud attributes
   # This tells GCP *who* is calling from GitHub.
   attribute_mapping = {
-    "google.subject"        = "assertion.sub"
-    "attribute.repository"  = "assertion.repository"
+    "google.subject"        = "assertion.repository"
     "attribute.repository_owner" = "assertion.repository_owner"
   }
 
