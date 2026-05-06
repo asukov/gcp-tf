@@ -20,16 +20,16 @@
 #     database_version: "MYSQL_8_0"
 #     tier: "db-f1-micro"
 
-# storage_buckets:
+storage_buckets:
   # A standard multi-region bucket in the EU region
-  # multi-regional-storage-bucket: # Cloud Storage bucket name
-  #   location: "EU"
-  #   # storage_class can be "STANDARD", "NEARLINE", "COLDLINE", "ARCHIVE"
-  #   storage_class: "STANDARD"
-  #   uniform_bucket_level_access: true
-  #   versioning: true
-  #   force_destroy: true
-  #   public_access: false
+  multi-regional-storage-bucket: # Cloud Storage bucket name
+    location: "EU"
+    # storage_class can be "STANDARD", "NEARLINE", "COLDLINE", "ARCHIVE"
+    storage_class: "STANDARD"
+    uniform_bucket_level_access: true
+    versioning: true
+    force_destroy: true
+    public_access: false
   # # A regional bucket in the europe-west1 region 
   # single-region-storage-bucket:
   #   location: "europe-west1"
