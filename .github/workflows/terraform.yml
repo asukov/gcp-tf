@@ -2,8 +2,13 @@ name: 'Terraform Deploy via WIF'
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      force_apply:
+        description: 'Set to true to approve deletions/modifications'
+        type: boolean
+        default: false
 
 # CRITICAL: You must explicitly request these permissions for OIDC to work!
 permissions:
@@ -35,109 +40,86 @@ jobs:
   #         CKV_GCP_42,
   #         CKV_GCP_49,
   #         CKV_GCP_125
+  
   terraform-plan:
-    name: 'Terraform Plan'
+    name: 'Plan'
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: ./sample-project
     outputs:
-      is_risky: ${{ steps.check_risk.outputs.is_risky }}
+      has_changes: ${{ steps.plan.outputs.has_changes }}
+      is_risky: ${{ steps.plan.outputs.is_risky }}
     steps:
-    - name: 'Checkout Repository'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive' # If your repo has submodules, this ensures they are also checked out
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
 
-    - name: 'Authenticate to Google Cloud'
-      id: auth
-      uses: google-github-actions/auth@v2
-      with:
-        workload_identity_provider: 'projects/588269308956/locations/global/workloadIdentityPools/github-actions-pool-v2/providers/github-actions-provider'
-        service_account: 'asukov-tf-rw@boxwood-bee-484209-r9.iam.gserviceaccount.com'
-        export_environment_variables: true
-    
-    - name: 'Setup Terraform'
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: "1.14.4" # Match your FAST version
-    - name: 'Terraform Init'
-      run: terraform init
+      - name: 'Authenticate to Google Cloud'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/588269308956/locations/global/workloadIdentityPools/github-actions-pool-v2/providers/github-actions-provider'
+          service_account: 'asukov-tf-rw@boxwood-bee-484209-r9.iam.gserviceaccount.com'
 
-    - name: 'Terraform Plan'
-      id: plan
-      run: terraform plan -out=tfplan
-    
-    # This step inspects the plan for any 'delete' or 'update' actions
-    - name: 'Check for Deletions or Modifications'
-      id: check_risk
-      run: |
-        terraform show -json tfplan > tfplan.json
-        # Count resources with 'delete' or 'update' actions
-        RISKY_CHANGES=$(jq '[.resource_changes[]?.change.actions[] | select(. == "delete" or . == "update")] | length' tfplan.json)
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.14.4"
 
-        echo "Risky changes count: $RISKY_CHANGES"
+      - run: terraform init
 
-        if [ "$RISKY_CHANGES" -gt 0 ]; then
-          echo "risky=true" >> $GITHUB_OUTPUT
-        else
-          echo "risky=false" >> $GITHUB_OUTPUT
-        fi
-    
-    - name: 'Upload Plan Artifact'
-      uses: actions/checkout@v4 # Re-using checkout logic for artifact paths
-      with:
-          path: tfplan
-    - uses: actions/upload-artifact@v4
-      with:
-        name: tfplan
-        path: ./sample-project/tfplan    
+      # detailed-exitcode returns 2 if there are changes, 0 if no changes
+      - name: 'Terraform Plan'
+        id: plan
+        continue-on-error: true
+        run: |
+          terraform plan -detailed-exitcode -out=tfplan
+          EXIT_CODE=$?
+          
+          if [ $EXIT_CODE -eq 2 ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            # Check for deletions/updates only if changes exist
+            RISKY=$(terraform show -json tfplan | jq '[.resource_changes[]?.change.actions[] | select(. == "delete" or . == "update")] | length > 0')
+            echo "is_risky=$RISKY" >> $GITHUB_OUTPUT
+          elif [ $EXIT_CODE -eq 0 ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "is_risky=false" >> $GITHUB_OUTPUT
+          else
+            exit $EXIT_CODE # Actual error
+          fi
+
+      - name: 'Upload Plan'
+        if: steps.plan.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: ./sample-project/tfplan
 
   terraform-apply:
-    name: 'Terraform Apply'
+    name: 'Apply'
     needs: terraform-plan
+    # Logic: Only run if changes exist AND (it's not risky OR user clicked force checkbox)
+    if: |
+      needs.terraform-plan.outputs.has_changes == 'true' && 
+      (needs.terraform-plan.outputs.is_risky == 'false' || github.event.inputs.force_apply == true)
     runs-on: ubuntu-latest
-    
-    # This triggers the manual approval if risky is true
-    environment: ${{ needs.terraform-plan.outputs.is_risky == 'true' && 'production' || 'none' }}
     defaults:
       run:
         working-directory: ./sample-project
-
     steps:
-    - name: 'Checkout Repository'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive' # If your repo has submodules, this ensures they are also checked out
-    - name: 'Download Plan Artifact'
-      uses: actions/download-artifact@v4
-      with:
-        name: tfplan
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: ./sample-project
 
-    - name: 'Authenticate to Google Cloud'
-      id: auth
-      uses: google-github-actions/auth@v2
-      with:
-        workload_identity_provider: 'projects/588269308956/locations/global/workloadIdentityPools/github-actions-pool-v2/providers/github-actions-provider'
-        service_account: 'asukov-tf-rw@boxwood-bee-484209-r9.iam.gserviceaccount.com'
+      - name: 'Authenticate to Google Cloud'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/588269308956/locations/global/workloadIdentityPools/github-actions-pool-v2/providers/github-actions-provider'
+          service_account: 'asukov-tf-rw@boxwood-bee-484209-r9.iam.gserviceaccount.com'
 
-    - name: 'Setup Terraform'
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: "1.14.4" # Match your FAST version
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.14.4"
 
-    # 3. Run Terraform (It automatically uses the auth from Step 1)
-    - name: 'Terraform Init'
-      run: terraform init
-    
-    - name: 'Debug Directory Contents'
-      run: |
-        pwd
-        ls -la
-
-    # - name: 'Force Unlock State'
-    #   run: terraform force-unlock -force 1776780558207852
-
-    - name: 'Terraform Apply'
-      run: terraform apply -auto-approve tfplan
+      - run: terraform init
+      - run: terraform apply -auto-approve tfplan
