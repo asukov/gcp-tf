@@ -100,6 +100,21 @@ jobs:
           name: tfplan
           path: ./sample-project/tfplan
 
+  debug-logic:
+    name: 'Debug Variables'
+    needs: terraform-plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Print Evaluated Outputs'
+        run: |
+          echo "=== DEBUG INFO ==="
+          echo "has_changes: '${{ needs.terraform-plan.outputs.has_changes }}'"
+          echo "is_risky: '${{ needs.terraform-plan.outputs.is_risky }}'"
+          echo "github.event.inputs.force_apply: '${{ github.event.inputs.force_apply }}'"
+          echo "inputs.force_apply: '${{ inputs.force_apply }}'"
+          echo "github.ref: '${{ github.ref }}'"
+          echo "=================="
+
   terraform-apply:
     name: 'Apply'
     needs: terraform-plan
