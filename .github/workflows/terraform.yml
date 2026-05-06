@@ -59,7 +59,7 @@ jobs:
       uses: google-github-actions/auth@v2
       with:
         # The full path to the Provider you created in Phase 1
-        workload_identity_provider: 'projects/588269308956/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+        workload_identity_provider: 'projects/588269308956/locations/global/workloadIdentityPools/github-actions-pool-v2/providers/github-actions-provider'
         
         # The email of the service account you want to impersonate
         service_account: 'asukov-tf-rw@boxwood-bee-484209-r9.iam.gserviceaccount.com'

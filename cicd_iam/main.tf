@@ -1,7 +1,7 @@
 # Create the Workload Identity Pool
 resource "google_iam_workload_identity_pool" "github_pool" {
   project                   = var.project_id # The project where your tf-rw service accounts live
-  workload_identity_pool_id = "github-actions-pool"
+  workload_identity_pool_id = "github-actions-pool-v2"
   display_name              = "GitHub Actions Pool"
   description               = "Identity pool for GitHub Actions deployments"
 }
@@ -38,6 +38,6 @@ resource "google_service_account_iam_member" "allow_github_impersonation" {
   
   # IMPORTANT: Only allow a specific GitHub repository to impersonate!
   # This uses the attribute mapping defined above.
-  member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_pool.name}/attribute.repository/asukov/gcp-tf-projects"
+  member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_pool.name}/attribute.repository/asukov/gcp-tf"
 }
 
