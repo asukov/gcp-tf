@@ -65,6 +65,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.14.4"
+          terraform_wrapper: false
 
       - run: terraform init
 
@@ -73,6 +74,8 @@ jobs:
         id: plan
         continue-on-error: true
         run: |
+          # Temporarily disable 'exit on error' so the script doesn't crash when Terraform returns 2
+          set +e 
           terraform plan -detailed-exitcode -out=tfplan
           EXIT_CODE=$?
           
@@ -140,6 +143,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.14.4"
+          terraform_wrapper: false
 
       - run: terraform init
       - run: terraform apply -auto-approve tfplan
