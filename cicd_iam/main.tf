@@ -26,7 +26,7 @@ resource "google_iam_workload_identity_pool_provider" "github_provider" {
     "attribute.repository_owner" = "assertion.repository_owner"
   }
 
-  attribute_condition = "attribute.repository_owner == 'asukov'"
+  attribute_condition = "attribute.repository_owner == 'asukov' && attribute.repository == 'asukov/gcp-tf'"
 }
 
 # Grant the GitHub Actions workflow permission to impersonate the Terraform service account
