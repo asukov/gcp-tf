@@ -67,7 +67,7 @@ jobs:
 
     - name: 'Terraform Plan'
       id: plan
-      run: terraform plan -out=tfplan'
+      run: terraform plan -out=tfplan
     
     # This step inspects the plan for any 'delete' or 'update' actions
     - name: 'Check for Deletions or Modifications'
