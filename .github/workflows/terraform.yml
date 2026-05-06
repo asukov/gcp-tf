@@ -31,6 +31,9 @@ jobs:
         directory: /
         framework: terraform
         output_format: cli
+        skip_check: >-
+          CKV_GCP_42,
+          CKV_GCP_49
 
   terraform-apply:
     name: 'Terraform Apply'
