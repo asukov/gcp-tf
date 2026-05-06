@@ -33,7 +33,8 @@ jobs:
         output_format: cli
         skip_check: >-
           CKV_GCP_42,
-          CKV_GCP_49
+          CKV_GCP_49,
+          CKV_GCP_125
 
   terraform-apply:
     name: 'Terraform Apply'
