@@ -78,14 +78,19 @@ jobs:
           
           if [ $EXIT_CODE -eq 2 ]; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            # Check for deletions/updates only if changes exist
-            RISKY=$(terraform show -json tfplan | jq '[.resource_changes[]?.change.actions[] | select(. == "delete" or . == "update")] | length > 0')
+            # FIX: Added -r to ensure raw string output
+            RISKY=$(terraform show -json tfplan | jq -r '[.resource_changes[]?.change.actions[] | select(. == "delete" or . == "update")] | length > 0')
             echo "is_risky=$RISKY" >> $GITHUB_OUTPUT
+            
+            # Debugging output to see it in the logs
+            echo "Detected has_changes=true and is_risky=$RISKY"
+            
           elif [ $EXIT_CODE -eq 0 ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "is_risky=false" >> $GITHUB_OUTPUT
+            echo "No changes detected."
           else
-            exit $EXIT_CODE # Actual error
+            exit $EXIT_CODE
           fi
 
       - name: 'Upload Plan'
@@ -99,9 +104,7 @@ jobs:
     name: 'Apply'
     needs: terraform-plan
     # Logic: Only run if changes exist AND (it's not risky OR user clicked force checkbox)
-    if: |
-      needs.terraform-plan.outputs.has_changes == 'true' && 
-      (needs.terraform-plan.outputs.is_risky == 'false' || github.event.inputs.force_apply == true)
+    if: needs.terraform-plan.outputs.has_changes == 'true' && (needs.terraform-plan.outputs.is_risky == 'false' || inputs.force_apply == true || inputs.force_apply == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
