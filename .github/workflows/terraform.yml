@@ -24,8 +24,6 @@ jobs:
     steps:
     - name: 'Checkout Repository'
       uses: actions/checkout@v4
-      with:
-        submodules: 'recursive' # If your repo has submodules, this ensures they are also checked out
 
     - name: Run Checkov IaC scan
       uses: bridgecrewio/checkov-action@master
