@@ -1,49 +1,49 @@
-vms:
-  my-linux-vm: # VM name
-    zone: "us-west1-a"
-    machine_type: "e2-micro"
-    network: "default"
-    subnetwork: "default"
-    assign_external_ip: false
-    boot_disk_image_project: "ubuntu-os-cloud"
-    boot_disk_image_family: "ubuntu-2204-lts"
+# vms:
+#   my-linux-vm: # VM name
+#     zone: "us-west1-a"
+#     machine_type: "e2-micro"
+#     network: "default"
+#     subnetwork: "default"
+#     assign_external_ip: false
+#     boot_disk_image_project: "ubuntu-os-cloud"
+#     boot_disk_image_family: "ubuntu-2204-lts"
 
-cloud_runs:
-  my-hello-app: # Cloud Run service name
-    region: "us-west1"
-    image: "us-docker.pkg.dev/cloudrun/container/hello"
+# cloud_runs:
+#   my-hello-app: # Cloud Run service name
+#     region: "us-west1"
+#     image: "us-docker.pkg.dev/cloudrun/container/hello"
 
-databases:
-  my-pg-database: # Cloud SQL instance name
-    region: "us-west1"
-    network: "default"
-    database_version: "MYSQL_8_0"
-    tier: "db-f1-micro"
+# databases:
+#   my-pg-database: # Cloud SQL instance name
+#     region: "us-west1"
+#     network: "default"
+#     database_version: "MYSQL_8_0"
+#     tier: "db-f1-micro"
 
-storage_buckets:
-  # A standard multi-region bucket in the EU region
-  multi-regional-storage-bucket: # Cloud Storage bucket name
-    location: "EU"
-    # storage_class can be "STANDARD", "NEARLINE", "COLDLINE", "ARCHIVE"
-    storage_class: "STANDARD"
-    uniform_bucket_level_access: true
-    versioning: true
-    force_destroy: true
-    public_access: false
-  # A regional bucket in the europe-west1 region 
-  single-region-storage-bucket:
-    location: "europe-west1"
-    storage_class: "NEARLINE"
-    uniform_bucket_level_access: true
-    versioning: true
-    force_destroy: true
-    public_access: false
-  # A bucket for public website
-  "public-website_bucket":
-    location: "EU"
-    storage_class: "STANDARD"
-    # Uniform bucket-level access MUST be true for modern public buckets
-    uniform_bucket_level_access: true
-    versioning: true
-    force_destroy: true
-    public_access: true
+# storage_buckets:
+#   # A standard multi-region bucket in the EU region
+#   multi-regional-storage-bucket: # Cloud Storage bucket name
+#     location: "EU"
+#     # storage_class can be "STANDARD", "NEARLINE", "COLDLINE", "ARCHIVE"
+#     storage_class: "STANDARD"
+#     uniform_bucket_level_access: true
+#     versioning: true
+#     force_destroy: true
+#     public_access: false
+#   # A regional bucket in the europe-west1 region 
+#   single-region-storage-bucket:
+#     location: "europe-west1"
+#     storage_class: "NEARLINE"
+#     uniform_bucket_level_access: true
+#     versioning: true
+#     force_destroy: true
+#     public_access: false
+#   # A bucket for public website
+#   "public-website_bucket":
+#     location: "EU"
+#     storage_class: "STANDARD"
+#     # Uniform bucket-level access MUST be true for modern public buckets
+#     uniform_bucket_level_access: true
+#     versioning: true
+#     force_destroy: true
+#     public_access: true
