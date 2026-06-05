@@ -103,6 +103,9 @@ jobs:
           echo "=== DEBUG INFO ==="
           echo "has_changes: '${{ needs.terraform-plan.outputs.has_changes }}'"
           echo "=================="
+          echo "WIF_PROVIDER_NAME: '${{ secrets.WIF_PROVIDER_NAME }}'"
+          echo "GCP_SA_EMAIL: '${{ secrets.GCP_SA_EMAIL }}'"
+          echo "=================="
 
   terraform-apply:
     name: 'Apply'
